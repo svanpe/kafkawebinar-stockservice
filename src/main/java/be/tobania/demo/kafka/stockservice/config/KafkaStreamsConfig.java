@@ -1,30 +1,17 @@
 package be.tobania.demo.kafka.stockservice.config;
 
-import be.tobania.demo.kafka.stockservice.model.Parcel;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.StreamsConfig;
-import org.apache.kafka.streams.kstream.Consumed;
-import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.processor.FailOnInvalidTimestamp;
-import org.apache.kafka.streams.processor.WallclockTimestampExtractor;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
-import org.springframework.kafka.annotation.EnableKafkaStreams;
-import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
-import org.springframework.kafka.retrytopic.DefaultDestinationTopicProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.apache.kafka.streams.StreamsConfig.*;
 
 
 @Configuration
@@ -41,7 +28,7 @@ public class KafkaStreamsConfig {
 
     }
 
-   @Bean("productStreamBuilder")
+    @Bean("productStreamBuilder")
     public StreamsBuilderFactoryBean app1StreamBuilderFactoryBean() {
         Map<String, Object> config = new HashMap<>();
         setDefaults(config);
