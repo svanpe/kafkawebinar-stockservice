@@ -4,8 +4,10 @@ import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.processor.FailOnInvalidTimestamp;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.config.StreamsBuilderFactoryBean;
@@ -14,12 +16,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-@Configuration
 @EnableKafka
+@PropertySource("classpath:application.properties")
+@Configuration
 public class KafkaStreamsConfig {
 
+
+    @Value("${spring.kafka.consumer.bootstrap-servers}")
+    private String bootstrapAddress;
+
     public void setDefaults(Map<String, Object> config) {
-        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9093");
+        config.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG,bootstrapAddress);
         config.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         config.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass());
         config.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
