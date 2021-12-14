@@ -1,10 +1,10 @@
 package be.tobania.demo.kafka.stockservice.service;
 
 import be.tobania.demo.kafka.stockservice.entity.ProductEntity;
-import be.tobania.demo.kafka.stockservice.model.Order;
 import be.tobania.demo.kafka.stockservice.model.OrderItem;
+import be.tobania.demo.kafka.stockservice.model.Parcel;
 import be.tobania.demo.kafka.stockservice.model.Product;
-import be.tobania.demo.kafka.stockservice.model.enums.OrderStatus;
+import be.tobania.demo.kafka.stockservice.model.enums.ParcelStatus;
 import be.tobania.demo.kafka.stockservice.repository.ProductRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,6 +16,7 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -30,27 +31,26 @@ public class StockProcessor {
     private final ProductRepository productRepository;
 
 
-    //@Scheduled(fixedDelay = 5000)
     @Bean
     public KStream<String, String> startProcessing(@Qualifier("productStreamBuilder") StreamsBuilder builder) {
         log.info(" start streaming to update product stock");
 
-        builder.stream("orders", Consumed
+        builder.stream("shipping", Consumed
                 .with(Serdes.String(), Serdes.String())).
                 foreach((v, k) -> {
 
                     try {
 
-                        Order order = objectMapper.readValue(k, Order.class);
+                        Parcel parcel = objectMapper.readValue(k, Parcel.class);
 
-                        if (order.getStatus() == OrderStatus.SHIPPED) {
+                        if (parcel.getStatus() == ParcelStatus.IN_DELIVERY) {
                             ProductEntity productEntity = new ProductEntity();
-                            List<OrderItem> orderItemList = order.getOrderItems();
+                            List<OrderItem> orderItemList = parcel.getOrder().getOrderItems();
                             orderItemList.forEach(o -> {
                                 Product product = o.getProduct();
                                 Optional<ProductEntity> productEntity1 = productRepository.findProductEntityByName(product.getName());
 
-                                if (productEntity1.isEmpty()) {
+                                if(productEntity1.isEmpty()){
                                     ProductEntity newProduct = new ProductEntity();
 
                                     newProduct.setName(product.getName());
@@ -65,7 +65,8 @@ public class StockProcessor {
                                     ProductEntity savedProductEntity2 = productRepository.save(saveProduct);
 
                                     log.info(String.format("************* The update total product is : -> %d", savedProductEntity2.getTotalQuantity()));
-                                } else {
+                                }
+                                else{
 
                                     log.info(String.format("*********** The current total product is : %d", productEntity.getTotalQuantity()));
 
@@ -75,6 +76,7 @@ public class StockProcessor {
 
                                     log.info(String.format("************* The update total product is : -> %d", savedProductEntity2.getTotalQuantity()));
                                 }
+
 
 
                             });
